@@ -4,6 +4,8 @@ import 'dart:ui' as ui;
 
 import 'package:another_brother/label_info.dart';
 import 'package:another_brother/printer_info.dart';
+import 'package:audioplayers/audio_cache.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -70,6 +72,17 @@ class _QlBluetoothPrintHappyMothersDayState
   var _assetImage = 'assets/blank.png';
   GlobalKey _globalKey = GlobalKey();
   Uint8List pngBytes;
+  AudioCache _audioCache;
+  var _image = "assets/all_your_base_closed.jpeg";
+
+  @override
+  void initState() {
+    super.initState();
+    // create this only once
+    _audioCache = AudioCache(
+        prefix: "assets/",
+        fixedPlayer: AudioPlayer()..setReleaseMode(ReleaseMode.STOP));
+  }
 
   /*
   Future<void> _capturePng() async {
@@ -97,6 +110,27 @@ class _QlBluetoothPrintHappyMothersDayState
     } catch (e) {
       print(e);
     }
+  }
+
+  void move_mouth(duration_milli) async {
+    while (duration_milli > 0) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      setState(() => _image = "assets/all_your_base_open.png");
+      await Future.delayed(const Duration(milliseconds: 200));
+      setState(() => _image = "assets/all_your_base_closed.jpeg");
+
+      duration_milli -= 400;
+    }
+  }
+
+  void all_your_base_animate(context) async {
+    move_mouth(1600);
+    await Future.delayed(const Duration(milliseconds: 4300));
+    move_mouth(1600);
+    await Future.delayed(const Duration(milliseconds: 3400));
+    move_mouth(1400);
+
+    print(context);
   }
 
   void print(BuildContext context) async {
@@ -131,7 +165,7 @@ class _QlBluetoothPrintHappyMothersDayState
     printInfo.macAddress = printers.single.macAddress;
 
     printer.setPrinterInfo(printInfo);
-    printer.printImage(await loadImage('assets/this_is_nametag.png'));
+    printer.printImage(await loadImage('assets/mynameis.png'));
   }
 
   @override
@@ -152,7 +186,14 @@ class _QlBluetoothPrintHappyMothersDayState
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          new Image(image: new AssetImage("assets/this_is_dog.gif")),
+          ElevatedButton(
+            onPressed: () {
+              _audioCache.play('allbase.mp3');
+              all_your_base_animate(context);
+            },
+            child: Text("Sign in to event"),
+          ),
+          new Image(image: new AssetImage(_image)),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
@@ -167,11 +208,13 @@ class _QlBluetoothPrintHappyMothersDayState
         ],
       ),
 
+      /*
       floatingActionButton: FloatingActionButton(
         onPressed: () => print(context),
         tooltip: 'Print',
         child: Icon(Icons.print),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+      */
     );
   }
 

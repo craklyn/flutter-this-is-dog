@@ -24,6 +24,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  audioplayers: any
+
   # Use Another_Brother directly from its git Repo
   another_brother:
     git:
@@ -52,6 +54,10 @@ flutter:
   assets:
     - assets/this_is_dog.gif
     - assets/this_is_nametag.png
+    - assets/allbase.mp3
+    - assets/all_your_base_closed.jpeg
+    - assets/all_your_base_open.png
+    - assets/mynameis.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
