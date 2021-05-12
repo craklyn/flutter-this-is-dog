@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -74,6 +75,9 @@ class _QlBluetoothPrintHappyMothersDayState
   Uint8List pngBytes;
   AudioCache _audioCache;
   var _image = "assets/all_your_base_closed.jpeg";
+  Timer timer;
+  List<double> mouthTimes;
+  int milliseconds = 0;
 
   @override
   void initState() {
@@ -112,28 +116,64 @@ class _QlBluetoothPrintHappyMothersDayState
     }
   }
 
-  void move_mouth(duration_milli) async {
-    while (duration_milli > 0) {
-      await Future.delayed(const Duration(milliseconds: 200));
-      setState(() => _image = "assets/all_your_base_open.png");
-      await Future.delayed(const Duration(milliseconds: 200));
-      setState(() => _image = "assets/all_your_base_closed.jpeg");
+  void update_mouth(_) {
+    setState(() {
+      milliseconds += 100;
+    });
 
-      duration_milli -= 400;
+    var talking =
+        mouthTimes.where((x) => (x - milliseconds).abs() < 100).length > 0;
+
+    // print(milliseconds);
+//    print(talking);
+
+    if (talking) {
+      if (_image == "assets/all_your_base_open.png") {
+        setState(() => _image = "assets/all_your_base_closed.jpeg");
+      } else {
+        setState(() => _image = "assets/all_your_base_open.png");
+      }
+    } else {
+      setState(() => _image = "assets/all_your_base_closed.jpeg");
     }
   }
 
   void all_your_base_animate(context) async {
-    move_mouth(1600);
-    await Future.delayed(const Duration(milliseconds: 4300));
-    move_mouth(1600);
-    await Future.delayed(const Duration(milliseconds: 3400));
-    move_mouth(1400);
+    String data = await DefaultAssetBundle.of(context)
+        .loadString("assets/transcribe-all-your-base.json");
+    final jsonResult = json.decode(data);
 
-    print(context);
+    var wordsJson = jsonResult['results']['items'] as List;
+    wordsJson = wordsJson.where((x) => x.containsKey("start_time")).toList();
+
+    List<double> tagObjs = wordsJson
+        .map<double>((x) => double.parse(x['start_time']) * 1000)
+        .toList();
+
+    /*
+        List<double> tagObjs_start = wordsJson
+        .map<double>((x) => double.parse(x['start_time']) * 1000)
+        .toList();
+    List<double> tagObjs_end = wordsJson
+        .map<double>((x) => double.parse(x['end_time']) * 1000)
+        .toList();
+
+    var tagObjs = new List<double>.from(tagObjs_start)..addAll(tagObjs_end);
+     */
+
+//    print(tagObjs);
+
+    setState(() {
+      mouthTimes = tagObjs;
+      milliseconds = 0;
+    });
+
+    setState(() {
+      timer = Timer.periodic(Duration(milliseconds: 100), update_mouth);
+    });
   }
 
-  void print(BuildContext context) async {
+  void printContext(BuildContext context) async {
     var printer = new Printer();
     var printInfo = PrinterInfo();
     printInfo.printerModel = Model.QL_1110NWB;

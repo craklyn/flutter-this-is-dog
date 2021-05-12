@@ -58,6 +58,7 @@ flutter:
     - assets/all_your_base_closed.jpeg
     - assets/all_your_base_open.png
     - assets/mynameis.png
+    - assets/transcribe-all-your-base.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
